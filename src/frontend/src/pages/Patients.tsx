@@ -26,7 +26,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useBackend } from "@/hooks/useBackend";
-import { History, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { useInternetIdentity } from "@/hooks/useInternetIdentity";
+import {
+  AlertTriangle,
+  History,
+  Loader2,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -45,6 +54,9 @@ const SKELETON_COLS = ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"];
 
 export default function Patients() {
   const { backend, isLoading: actorLoading } = useBackend();
+  const { identity } = useInternetIdentity();
+  const isLoggedIn = !!identity && !identity.getPrincipal().isAnonymous();
+
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -94,7 +106,10 @@ export default function Patients() {
   };
 
   const handleSave = async () => {
-    if (!backend) return;
+    if (!backend || !isLoggedIn) {
+      toast.error("Please log in first");
+      return;
+    }
     if (!form.name || !form.age || !form.gender) {
       toast.error("Name, age, and gender are required");
       return;
@@ -171,6 +186,20 @@ export default function Patients() {
 
   return (
     <div className="space-y-4">
+      {!isLoggedIn && (
+        <div
+          data-ocid="patients.login_warning"
+          className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-800"
+        >
+          <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
+          <p className="text-sm font-medium">
+            You must be logged in to manage patients. Use the{" "}
+            <span className="font-semibold">Login</span> button in the top-right
+            corner.
+          </p>
+        </div>
+      )}
+
       <div className="flex items-center justify-between gap-4">
         <div className="relative w-72">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -186,6 +215,7 @@ export default function Patients() {
           data-ocid="patients.add_button"
           onClick={openAdd}
           className="gap-2"
+          disabled={!isLoggedIn}
         >
           <Plus className="h-4 w-4" /> Add Patient
         </Button>

@@ -5,6 +5,7 @@ import { useInternetIdentity } from "@/hooks/useInternetIdentity";
 import { LogIn, LogOut } from "lucide-react";
 
 const pageTitles: Record<Page, string> = {
+  home: "Home",
   dashboard: "Dashboard",
   patients: "Patient Management",
   doctors: "Doctor Management",

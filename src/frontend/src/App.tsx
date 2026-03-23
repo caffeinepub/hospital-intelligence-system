@@ -5,10 +5,12 @@ import Analytics from "@/pages/Analytics";
 import Appointments from "@/pages/Appointments";
 import Dashboard from "@/pages/Dashboard";
 import Doctors from "@/pages/Doctors";
+import Home from "@/pages/Home";
 import Patients from "@/pages/Patients";
 import { useState } from "react";
 
 export type Page =
+  | "home"
   | "dashboard"
   | "patients"
   | "doctors"
@@ -16,7 +18,16 @@ export type Page =
   | "analytics";
 
 export default function App() {
-  const [activePage, setActivePage] = useState<Page>("dashboard");
+  const [activePage, setActivePage] = useState<Page>("home");
+
+  if (activePage === "home") {
+    return (
+      <>
+        <Home onNavigate={setActivePage} />
+        <Toaster richColors position="top-right" />
+      </>
+    );
+  }
 
   const renderPage = () => {
     switch (activePage) {
