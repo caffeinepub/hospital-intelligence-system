@@ -102,8 +102,12 @@ export default function Doctors() {
   };
 
   const handleSave = async () => {
-    if (!backend || !isLoggedIn) {
+    if (!isLoggedIn) {
       toast.error("Please log in first");
+      return;
+    }
+    if (!backend) {
+      toast.error("System is initializing, please try again in a moment.");
       return;
     }
     if (!form.name || !form.specialization) {
@@ -372,7 +376,7 @@ export default function Doctors() {
             <Button
               data-ocid="doctors.modal.submit_button"
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || actorLoading || !backend}
             >
               {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {editDoctor ? "Update" : "Add Doctor"}

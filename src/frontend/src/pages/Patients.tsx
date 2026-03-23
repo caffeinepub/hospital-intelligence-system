@@ -106,8 +106,12 @@ export default function Patients() {
   };
 
   const handleSave = async () => {
-    if (!backend || !isLoggedIn) {
+    if (!isLoggedIn) {
       toast.error("Please log in first");
+      return;
+    }
+    if (!backend) {
+      toast.error("System is initializing, please try again in a moment.");
       return;
     }
     if (!form.name || !form.age || !form.gender) {
@@ -430,10 +434,23 @@ export default function Patients() {
             <Button
               data-ocid="patients.modal.submit_button"
               onClick={handleSave}
-              disabled={saving}
+              disabled={saving || actorLoading || !backend}
             >
-              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {editPatient ? "Update" : "Add Patient"}
+              {actorLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connecting...
+                </>
+              ) : saving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {editPatient ? "Update" : "Add Patient"}
+                </>
+              ) : editPatient ? (
+                "Update"
+              ) : (
+                "Add Patient"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

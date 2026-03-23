@@ -3,7 +3,6 @@ import Nat "mo:core/Nat";
 import Map "mo:core/Map";
 import Array "mo:core/Array";
 import Iter "mo:core/Iter";
-import List "mo:core/List";
 import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
 import Order "mo:core/Order";
@@ -77,7 +76,7 @@ actor {
     name : Text;
   };
 
-  // Authorization state
+  // Authorization state (kept for compatibility)
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
@@ -95,22 +94,22 @@ actor {
   ///////////////////////////////
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view profiles");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     userProfiles.add(caller, profile);
   };
@@ -120,8 +119,8 @@ actor {
   ///////////////////////////////
 
   public shared ({ caller }) func createPatient(patient : Patient) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can create patients");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
 
     let newId = nextPatientId;
@@ -139,8 +138,8 @@ actor {
   };
 
   public shared ({ caller }) func readPatient(patientId : Nat) : async Patient {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can read patients");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     switch (patients.get(patientId)) {
       case (null) {
@@ -154,8 +153,8 @@ actor {
   };
 
   public shared ({ caller }) func updatePatient(patient : Patient) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update patients");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     switch (patients.get(patient.id)) {
       case (null) { Runtime.trap("Patient does not exist") };
@@ -171,8 +170,8 @@ actor {
   };
 
   public shared ({ caller }) func deletePatient(patientId : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can delete patients");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     switch (patients.get(patientId)) {
       case (null) {
@@ -194,8 +193,8 @@ actor {
   ///////////////////////////////
 
   public shared ({ caller }) func createDoctor(doctor : Doctor) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can create doctors");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
 
     let newId = nextDoctorId;
@@ -214,8 +213,8 @@ actor {
   };
 
   public shared ({ caller }) func readDoctor(doctorId : Nat) : async Doctor {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can read doctors");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     switch (doctors.get(doctorId)) {
       case (null) { Runtime.trap("Doctor does not exist") };
@@ -227,8 +226,8 @@ actor {
   };
 
   public shared ({ caller }) func updateDoctor(doctor : Doctor) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can update doctors");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     switch (doctors.get(doctor.id)) {
       case (null) { Runtime.trap("Doctor does not exist") };
@@ -244,8 +243,8 @@ actor {
   };
 
   public shared ({ caller }) func deleteDoctor(doctorId : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can delete doctors");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     switch (doctors.get(doctorId)) {
       case (null) { Runtime.trap("Doctor does not exist") };
@@ -265,8 +264,8 @@ actor {
   ///////////////////////////////
 
   public shared ({ caller }) func createAppointment(appointment : Appointment) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can create appointments");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
 
     let newId = nextAppointmentId;
@@ -284,8 +283,8 @@ actor {
   };
 
   public shared ({ caller }) func cancelAppointment(appointmentId : Nat) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can cancel appointments");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
 
     switch (appointments.get(appointmentId)) {
@@ -303,8 +302,8 @@ actor {
   };
 
   public shared ({ caller }) func rescheduleAppointment(appointmentId : Nat, newDate : Text, newTime : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can reschedule appointments");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
 
     switch (appointments.get(appointmentId)) {
@@ -323,15 +322,15 @@ actor {
   };
 
   public query ({ caller }) func getAppointmentsByPatient(patientId : Nat) : async [Appointment] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view appointments by patient");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     appointments.values().toArray().filter(func(a) { a.patientId == patientId and not a.deleted });
   };
 
   public query ({ caller }) func getAppointmentsByDoctor(doctorId : Nat) : async [Appointment] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view appointments by doctor");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     appointments.values().toArray().filter(func(a) { a.doctorId == doctorId and not a.deleted });
   };
@@ -341,8 +340,8 @@ actor {
   ///////////////////////////////
 
   public query ({ caller }) func getDiseaseFrequency() : async [(Text, Nat)] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view disease frequency");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     let frequency = Map.empty<Text, Nat>();
     for (p in patients.values()) {
@@ -357,8 +356,8 @@ actor {
   };
 
   public query ({ caller }) func getAdmissionsByDate() : async [(Text, Nat)] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view admissions by date");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     let admissions = Map.empty<Text, Nat>();
     for (p in patients.values()) {
@@ -373,8 +372,8 @@ actor {
   };
 
   public query ({ caller }) func getDoctorAppointmentCounts() : async [(Nat, Nat)] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view doctor appointment counts");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     let counts = Map.empty<Nat, Nat>();
     for (a in appointments.values()) {
@@ -389,8 +388,8 @@ actor {
   };
 
   public query ({ caller }) func getDashboardTotals(today : Text) : async DashboardTotals {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view dashboard totals");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     let totalPatients = patients.values().toArray().filter(func(p) { not p.deleted }).size();
     let totalDoctors = doctors.values().toArray().filter(func(d) { not d.deleted }).size();
@@ -409,22 +408,22 @@ actor {
   ///////////////////////////////
 
   public query ({ caller }) func getAllPatients() : async [Patient] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view all patients");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     patients.values().toArray().filter(func(p) { not p.deleted }).sort();
   };
 
   public query ({ caller }) func getAllDoctors() : async [Doctor] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view all doctors");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     doctors.values().toArray().filter(func(d) { not d.deleted }).sort();
   };
 
   public query ({ caller }) func getAllAppointments() : async [Appointment] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view all appointments");
+    if (caller.isAnonymous()) {
+      Runtime.trap("Unauthorized: Must be logged in");
     };
     appointments.values().toArray().filter(func(a) { not a.deleted }).sort();
   };
