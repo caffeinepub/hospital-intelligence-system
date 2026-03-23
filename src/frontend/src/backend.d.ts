@@ -29,6 +29,7 @@ export interface Doctor {
     availability: boolean;
     specialization: string;
     department: string;
+    photoUrl: string;
 }
 export interface Appointment {
     id: bigint;

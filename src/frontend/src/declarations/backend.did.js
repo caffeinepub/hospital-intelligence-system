@@ -34,6 +34,7 @@ export const Doctor = IDL.Record({
   'availability' : IDL.Bool,
   'specialization' : IDL.Text,
   'department' : IDL.Text,
+  'photoUrl' : IDL.Text,
 });
 export const Patient = IDL.Record({
   'id' : IDL.Nat,
@@ -138,6 +139,7 @@ export const idlFactory = ({ IDL }) => {
     'availability' : IDL.Bool,
     'specialization' : IDL.Text,
     'department' : IDL.Text,
+    'photoUrl' : IDL.Text,
   });
   const Patient = IDL.Record({
     'id' : IDL.Nat,

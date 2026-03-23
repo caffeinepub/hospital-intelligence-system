@@ -52,6 +52,18 @@ const EMPTY_FORM = {
 const SKELETON_ROWS = ["r1", "r2", "r3", "r4", "r5"];
 const SKELETON_COLS = ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"];
 
+const diseaseBadgeColor = (disease: string) => {
+  const colors = [
+    { bg: "#EFF6FF", color: "#2563EB", border: "#BFDBFE" },
+    { bg: "#F0FDF4", color: "#16A34A", border: "#BBF7D0" },
+    { bg: "#FAF5FF", color: "#7C3AED", border: "#DDD6FE" },
+    { bg: "#FFFBEB", color: "#D97706", border: "#FDE68A" },
+    { bg: "#FFF1F2", color: "#E11D48", border: "#FECDD3" },
+  ];
+  const idx = disease.length % colors.length;
+  return colors[idx];
+};
+
 export default function Patients() {
   const { backend, isLoading: actorLoading } = useBackend();
   const { identity } = useInternetIdentity();
@@ -193,12 +205,20 @@ export default function Patients() {
       {!isLoggedIn && (
         <div
           data-ocid="patients.login_warning"
-          className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-800"
+          className="flex items-start gap-3 rounded-xl border px-4 py-3"
+          style={{
+            background: "#FFFBEB",
+            borderColor: "#FDE68A",
+            color: "#92400E",
+          }}
         >
-          <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
+          <AlertTriangle
+            className="mt-0.5 h-5 w-5 flex-shrink-0"
+            style={{ color: "#D97706" }}
+          />
           <p className="text-sm font-medium">
             You must be logged in to manage patients. Use the{" "}
-            <span className="font-semibold">Login</span> button in the top-right
+            <span className="font-bold">Login</span> button in the top-right
             corner.
           </p>
         </div>
@@ -210,7 +230,7 @@ export default function Patients() {
           <Input
             data-ocid="patients.search_input"
             placeholder="Search patients or disease..."
-            className="pl-9 bg-card"
+            className="pl-9 bg-card shadow-sm"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -218,8 +238,17 @@ export default function Patients() {
         <Button
           data-ocid="patients.add_button"
           onClick={openAdd}
-          className="gap-2"
+          className="gap-2 font-semibold"
           disabled={!isLoggedIn}
+          style={
+            !isLoggedIn
+              ? {}
+              : {
+                  background: "linear-gradient(135deg, #0EA5E9, #0284C7)",
+                  border: "none",
+                  boxShadow: "0 4px 12px rgba(14,165,233,0.35)",
+                }
+          }
         >
           <Plus className="h-4 w-4" /> Add Patient
         </Button>
@@ -228,15 +257,35 @@ export default function Patients() {
       <div className="rounded-xl border border-border bg-card shadow-card overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead>Name</TableHead>
-              <TableHead>Age</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Disease</TableHead>
-              <TableHead>Treatment</TableHead>
-              <TableHead>Admission Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+            <TableRow
+              style={{
+                background: "linear-gradient(to right, #F8FAFF, #F0F6FF)",
+              }}
+            >
+              <TableHead className="font-semibold text-foreground">
+                Name
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Age
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Gender
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Contact
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Disease
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Treatment
+              </TableHead>
+              <TableHead className="font-semibold text-foreground">
+                Admission Date
+              </TableHead>
+              <TableHead className="text-right font-semibold text-foreground">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -261,58 +310,74 @@ export default function Patients() {
                 </TableCell>
               </TableRow>
             ) : (
-              filtered.map((p, idx) => (
-                <TableRow
-                  key={String(p.id)}
-                  data-ocid={`patients.item.${idx + 1}`}
-                  className="hover:bg-muted/30"
-                >
-                  <TableCell className="font-medium">{p.name}</TableCell>
-                  <TableCell>{String(p.age)}</TableCell>
-                  <TableCell>{p.gender}</TableCell>
-                  <TableCell>{p.contact}</TableCell>
-                  <TableCell>
-                    <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-700">
-                      {p.disease || "—"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="max-w-[140px] truncate">
-                    {p.treatment || "—"}
-                  </TableCell>
-                  <TableCell>{p.admissionDate || "—"}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        data-ocid={`patients.edit_button.${idx + 1}`}
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openEdit(p)}
-                        className="h-7 w-7 p-0"
+              filtered.map((p, idx) => {
+                const badge = diseaseBadgeColor(p.disease || "a");
+                return (
+                  <TableRow
+                    key={String(p.id)}
+                    data-ocid={`patients.item.${idx + 1}`}
+                    className="hover:bg-muted/30 transition-colors"
+                  >
+                    <TableCell className="font-semibold text-foreground">
+                      {p.name}
+                    </TableCell>
+                    <TableCell>{String(p.age)}</TableCell>
+                    <TableCell>{p.gender}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {p.contact}
+                    </TableCell>
+                    <TableCell>
+                      <span
+                        className="rounded-full px-2.5 py-0.5 text-xs font-semibold border"
+                        style={{
+                          background: badge.bg,
+                          color: badge.color,
+                          borderColor: badge.border,
+                        }}
                       >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        data-ocid={`patients.history_button.${idx + 1}`}
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openHistory(p)}
-                        className="h-7 w-7 p-0 text-muted-foreground"
-                      >
-                        <History className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        data-ocid={`patients.delete_button.${idx + 1}`}
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setDeleteId(p.id)}
-                        className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                        {p.disease || "—"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="max-w-[140px] truncate text-muted-foreground">
+                      {p.treatment || "—"}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {p.admissionDate || "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button
+                          data-ocid={`patients.edit_button.${idx + 1}`}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openEdit(p)}
+                          className="h-7 w-7 p-0 hover:text-primary"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          data-ocid={`patients.history_button.${idx + 1}`}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openHistory(p)}
+                          className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
+                        >
+                          <History className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          data-ocid={`patients.delete_button.${idx + 1}`}
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setDeleteId(p.id)}
+                          className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
@@ -322,14 +387,19 @@ export default function Patients() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-lg" data-ocid="patients.modal">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="font-display text-lg">
               {editPatient ? "Edit Patient" : "Add New Patient"}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="p-name">Full Name *</Label>
+                <Label
+                  htmlFor="p-name"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  Full Name *
+                </Label>
                 <Input
                   id="p-name"
                   data-ocid="patients.name.input"
@@ -338,10 +408,16 @@ export default function Patients() {
                     setForm((f) => ({ ...f, name: e.target.value }))
                   }
                   placeholder="John Doe"
+                  className="bg-muted/30"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="p-age">Age *</Label>
+                <Label
+                  htmlFor="p-age"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  Age *
+                </Label>
                 <Input
                   id="p-age"
                   data-ocid="patients.age.input"
@@ -351,17 +427,23 @@ export default function Patients() {
                     setForm((f) => ({ ...f, age: e.target.value }))
                   }
                   placeholder="35"
+                  className="bg-muted/30"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label>Gender *</Label>
+                <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Gender *
+                </Label>
                 <Select
                   value={form.gender}
                   onValueChange={(v) => setForm((f) => ({ ...f, gender: v }))}
                 >
-                  <SelectTrigger data-ocid="patients.gender.select">
+                  <SelectTrigger
+                    data-ocid="patients.gender.select"
+                    className="bg-muted/30"
+                  >
                     <SelectValue placeholder="Select gender" />
                   </SelectTrigger>
                   <SelectContent>
@@ -372,7 +454,12 @@ export default function Patients() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="p-contact">Contact</Label>
+                <Label
+                  htmlFor="p-contact"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  Contact
+                </Label>
                 <Input
                   id="p-contact"
                   data-ocid="patients.contact.input"
@@ -381,12 +468,18 @@ export default function Patients() {
                     setForm((f) => ({ ...f, contact: e.target.value }))
                   }
                   placeholder="+1 555 000 0000"
+                  className="bg-muted/30"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="p-disease">Disease</Label>
+                <Label
+                  htmlFor="p-disease"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  Disease
+                </Label>
                 <Input
                   id="p-disease"
                   data-ocid="patients.disease.input"
@@ -395,10 +488,16 @@ export default function Patients() {
                     setForm((f) => ({ ...f, disease: e.target.value }))
                   }
                   placeholder="Hypertension"
+                  className="bg-muted/30"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="p-admission">Admission Date</Label>
+                <Label
+                  htmlFor="p-admission"
+                  className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+                >
+                  Admission Date
+                </Label>
                 <Input
                   id="p-admission"
                   data-ocid="patients.admissionDate.input"
@@ -407,11 +506,17 @@ export default function Patients() {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, admissionDate: e.target.value }))
                   }
+                  className="bg-muted/30"
                 />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="p-treatment">Treatment Plan</Label>
+              <Label
+                htmlFor="p-treatment"
+                className="text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+              >
+                Treatment Plan
+              </Label>
               <Input
                 id="p-treatment"
                 data-ocid="patients.treatment.input"
@@ -420,6 +525,7 @@ export default function Patients() {
                   setForm((f) => ({ ...f, treatment: e.target.value }))
                 }
                 placeholder="Describe the treatment plan"
+                className="bg-muted/30"
               />
             </div>
           </div>
@@ -435,6 +541,10 @@ export default function Patients() {
               data-ocid="patients.modal.submit_button"
               onClick={handleSave}
               disabled={saving || actorLoading || !backend}
+              style={{
+                background: "linear-gradient(135deg, #0EA5E9, #0284C7)",
+                border: "none",
+              }}
             >
               {actorLoading ? (
                 <>
@@ -444,10 +554,10 @@ export default function Patients() {
               ) : saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {editPatient ? "Update" : "Add Patient"}
+                  {editPatient ? "Updating..." : "Adding..."}
                 </>
               ) : editPatient ? (
-                "Update"
+                "Update Patient"
               ) : (
                 "Add Patient"
               )}
@@ -466,7 +576,7 @@ export default function Patients() {
           data-ocid="patients.delete_confirm.dialog"
         >
           <DialogHeader>
-            <DialogTitle>Delete Patient</DialogTitle>
+            <DialogTitle className="font-display">Delete Patient</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
             Are you sure you want to delete this patient? This action cannot be
@@ -500,7 +610,7 @@ export default function Patients() {
           data-ocid="patients.history.dialog"
         >
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="font-display">
               Appointment History — {historyPatient?.name}
             </DialogTitle>
           </DialogHeader>
@@ -510,7 +620,7 @@ export default function Patients() {
               data-ocid="patients.history.loading_state"
             >
               {["h1", "h2", "h3"].map((k) => (
-                <Skeleton key={k} className="h-8 w-full" />
+                <Skeleton key={k} className="h-10 w-full" />
               ))}
             </div>
           ) : history.length === 0 ? (
@@ -521,15 +631,15 @@ export default function Patients() {
               No appointments found for this patient.
             </p>
           ) : (
-            <div className="divide-y divide-border rounded-lg border border-border overflow-hidden">
+            <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
               {history.map((appt, idx) => (
                 <div
                   key={String(appt.id)}
                   data-ocid={`patients.history.item.${idx + 1}`}
-                  className="flex items-center justify-between px-4 py-3"
+                  className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors"
                 >
                   <div>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-semibold">
                       {appt.date} at {appt.time}
                     </p>
                     <p className="text-xs text-muted-foreground">

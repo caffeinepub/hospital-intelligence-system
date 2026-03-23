@@ -20,14 +20,22 @@ import {
 } from "recharts";
 
 const CHART_COLORS = [
-  "#2563EB",
-  "#38BDF8",
-  "#22C55E",
+  "#0EA5E9",
+  "#10B981",
+  "#8B5CF6",
   "#F59E0B",
   "#EF4444",
-  "#8B5CF6",
+  "#06B6D4",
   "#EC4899",
 ];
+
+const TOOLTIP_STYLE = {
+  borderRadius: 10,
+  border: "none",
+  fontSize: 13,
+  boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+  background: "white",
+};
 
 export default function Analytics() {
   const { backend, isLoading: actorLoading } = useBackend();
@@ -87,25 +95,29 @@ export default function Analytics() {
       label: "Total Admissions",
       value: totalAdmissions,
       icon: Users,
-      color: "bg-blue-50 text-blue-600",
+      accent: "#0EA5E9",
+      gradient: "linear-gradient(135deg, #0EA5E9, #0284C7)",
     },
     {
       label: "Disease Types",
       value: diseaseData.length,
       icon: Activity,
-      color: "bg-violet-50 text-violet-600",
+      accent: "#8B5CF6",
+      gradient: "linear-gradient(135deg, #8B5CF6, #7C3AED)",
     },
     {
       label: "Top Disease",
       value: topDisease?.name ?? "—",
       icon: TrendingUp,
-      color: "bg-amber-50 text-amber-600",
+      accent: "#F59E0B",
+      gradient: "linear-gradient(135deg, #F59E0B, #D97706)",
     },
     {
       label: "Busiest Doctor",
       value: busyDoctor?.name ?? "—",
       icon: Stethoscope,
-      color: "bg-emerald-50 text-emerald-600",
+      accent: "#10B981",
+      gradient: "linear-gradient(135deg, #10B981, #059669)",
     },
   ];
 
@@ -118,25 +130,34 @@ export default function Analytics() {
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
-            <Card key={card.label} className="shadow-card border-border">
+            <Card
+              key={card.label}
+              className="card-lift border-border overflow-hidden"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+            >
+              <div className="h-1" style={{ background: card.gradient }} />
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                       {card.label}
                     </p>
                     {loading ? (
                       <Skeleton className="mt-1 h-7 w-24" />
                     ) : (
-                      <p className="mt-1 text-2xl font-bold text-foreground truncate max-w-[140px]">
+                      <p className="font-display mt-1 text-2xl font-bold text-foreground truncate max-w-[140px]">
                         {card.value}
                       </p>
                     )}
                   </div>
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${card.color}`}
+                    className="flex h-10 w-10 items-center justify-center rounded-xl"
+                    style={{
+                      background: card.gradient,
+                      boxShadow: `0 4px 12px ${card.accent}40`,
+                    }}
                   >
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-5 w-5 text-white" />
                   </div>
                 </div>
               </CardContent>
@@ -146,9 +167,25 @@ export default function Analytics() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <Card className="shadow-card border-border">
+        <Card
+          className="border-border overflow-hidden"
+          style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        >
+          <div
+            className="h-1"
+            style={{ background: "linear-gradient(90deg, #0EA5E9, #38BDF8)" }}
+          />
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-lg"
+                style={{ background: "rgba(14,165,233,0.1)" }}
+              >
+                <Activity
+                  className="h-3.5 w-3.5"
+                  style={{ color: "#0EA5E9" }}
+                />
+              </span>
               Disease Frequency
             </CardTitle>
           </CardHeader>
@@ -176,28 +213,35 @@ export default function Analytics() {
                   layout="vertical"
                   margin={{ top: 4, right: 16, left: 0, bottom: 4 }}
                 >
+                  <defs>
+                    <linearGradient id="horizGrad" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#0EA5E9" stopOpacity={0.8} />
+                      <stop offset="100%" stopColor="#38BDF8" stopOpacity={1} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="#E5E7EB"
+                    stroke="rgba(0,0,0,0.05)"
                     horizontal={false}
                   />
-                  <XAxis type="number" tick={{ fontSize: 11 }} />
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
                   <YAxis
                     type="category"
                     dataKey="name"
                     tick={{ fontSize: 11 }}
                     width={90}
+                    axisLine={false}
+                    tickLine={false}
                   />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 8,
-                      border: "1px solid #E5E7EB",
-                      fontSize: 12,
-                    }}
-                  />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} />
                   <Bar
                     dataKey="count"
-                    fill="#2563EB"
+                    fill="url(#horizGrad)"
                     radius={[0, 4, 4, 0]}
                     name="Cases"
                   />
@@ -207,9 +251,25 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card border-border">
+        <Card
+          className="border-border overflow-hidden"
+          style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        >
+          <div
+            className="h-1"
+            style={{ background: "linear-gradient(90deg, #8B5CF6, #A78BFA)" }}
+          />
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-lg"
+                style={{ background: "rgba(139,92,246,0.1)" }}
+              >
+                <TrendingUp
+                  className="h-3.5 w-3.5"
+                  style={{ color: "#8B5CF6" }}
+                />
+              </span>
               Patient Admissions by Month
             </CardTitle>
           </CardHeader>
@@ -236,26 +296,46 @@ export default function Analytics() {
                   data={admissionData}
                   margin={{ top: 4, right: 16, left: -16, bottom: 4 }}
                 >
+                  <defs>
+                    <linearGradient
+                      id="lineAreaGrad"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stopColor="#8B5CF6"
+                        stopOpacity={0.15}
+                      />
+                      <stop offset="100%" stopColor="#8B5CF6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="#E5E7EB"
+                    stroke="rgba(0,0,0,0.05)"
                     vertical={false}
                   />
-                  <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 8,
-                      border: "1px solid #E5E7EB",
-                      fontSize: 12,
-                    }}
+                  <XAxis
+                    dataKey="month"
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
                   />
+                  <YAxis
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} />
                   <Line
                     type="monotone"
                     dataKey="count"
-                    stroke="#2563EB"
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: "#2563EB" }}
+                    stroke="#8B5CF6"
+                    strokeWidth={2.5}
+                    dot={{ r: 4, fill: "#8B5CF6", strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: "#8B5CF6", strokeWidth: 0 }}
                     name="Admissions"
                   />
                 </LineChart>
@@ -264,10 +344,26 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card border-border">
+        <Card
+          className="border-border overflow-hidden"
+          style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        >
+          <div
+            className="h-1"
+            style={{ background: "linear-gradient(90deg, #10B981, #34D399)" }}
+          />
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">
-              Doctor Workload (Appointments)
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-lg"
+                style={{ background: "rgba(16,185,129,0.1)" }}
+              >
+                <Stethoscope
+                  className="h-3.5 w-3.5"
+                  style={{ color: "#10B981" }}
+                />
+              </span>
+              Doctor Workload
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -295,21 +391,24 @@ export default function Analytics() {
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="#E5E7EB"
+                    stroke="rgba(0,0,0,0.05)"
                     vertical={false}
                   />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 8,
-                      border: "1px solid #E5E7EB",
-                      fontSize: 12,
-                    }}
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
                   />
+                  <YAxis
+                    tick={{ fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} />
                   <Bar
                     dataKey="count"
-                    radius={[4, 4, 0, 0]}
+                    radius={[6, 6, 0, 0]}
                     name="Appointments"
                   >
                     {workloadData.map((entry) => (
@@ -329,9 +428,25 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-card border-border">
+        <Card
+          className="border-border overflow-hidden"
+          style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}
+        >
+          <div
+            className="h-1"
+            style={{ background: "linear-gradient(90deg, #F59E0B, #FCD34D)" }}
+          />
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">
+            <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <span
+                className="flex h-7 w-7 items-center justify-center rounded-lg"
+                style={{ background: "rgba(245,158,11,0.1)" }}
+              >
+                <Activity
+                  className="h-3.5 w-3.5"
+                  style={{ color: "#F59E0B" }}
+                />
+              </span>
               Disease Distribution
             </CardTitle>
           </CardHeader>
@@ -361,7 +476,7 @@ export default function Analytics() {
                     cy="50%"
                     innerRadius={55}
                     outerRadius={85}
-                    paddingAngle={3}
+                    paddingAngle={4}
                     dataKey="count"
                     nameKey="name"
                   >
@@ -376,18 +491,14 @@ export default function Analytics() {
                       />
                     ))}
                   </Pie>
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 8,
-                      border: "1px solid #E5E7EB",
-                      fontSize: 12,
-                    }}
-                  />
+                  <Tooltip contentStyle={TOOLTIP_STYLE} />
                   <Legend
                     iconType="circle"
                     iconSize={8}
                     formatter={(value) => (
-                      <span style={{ fontSize: 11 }}>{value}</span>
+                      <span style={{ fontSize: 12, color: "#6B7280" }}>
+                        {value}
+                      </span>
                     )}
                   />
                 </PieChart>
